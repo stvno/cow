@@ -1,3 +1,11 @@
+/* 
+
+    This file became obsolete with the use of cow.pouchdb.js
+
+    
+*/
+
+
 /**Thanks to jquery-indexeddb.js:
 https://github.com/axemclion/jquery-indexeddb/blob/gh-pages/docs/README.md
 **/
@@ -18,7 +26,7 @@ $.Cow.LocalDbase.prototype = {
 		$.indexedDB(this.options.dbname)
 		    .objectStore("projects",storeOptions);
     },
-
+    /*Obsolete by pouchdb
     //PROJECTS
     projectsdb: function(options) {
 		switch(arguments.length) {
@@ -133,7 +141,7 @@ $.Cow.LocalDbase.prototype = {
         $.indexedDB(this.options.dbname)
 		    .objectStore("projects",false)["delete"](uid);
     },
-    
+    */
     //ITEMS
     itemsdb: function(options) {
         var self = this;

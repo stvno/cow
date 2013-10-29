@@ -6,7 +6,15 @@ $.Cow.Group.prototype = {
                 return this._getMembers();
                 break;
             case 1:
-                return this._addMember(peerid);
+                if (!$.isArray(peerid)) {
+                    return this._addMember(peerid);
+                }
+                else {
+                   $.each(peerid, function(i,d){
+                           self._addMember(d);
+                   });
+                   return this._getMembers();
+                }
                 break;
             default:
                 throw('wrong argument number');
@@ -24,15 +32,18 @@ $.Cow.Group.prototype = {
             }
         }
         if (!existing){
-            this.memberList.push({id: peerid, status:'active'}); //Adding to the list
+
+            this.memberList.push(peerid); //Adding to the list
+            //self.core.trigger('projectListChanged', this.core.UID);
         }
         return peerid;
     },
     removeMember: function(peerid){
         for (var i=0;i<this.memberList.length;i++){
-            if (this.memberList[i].id == peerid) {
-                //this.memberList.splice(i,1); //Remove from list
-                this.memberList[i].status = 'deleted';
+
+            if (this.memberList[i] == peerid) {
+                this.memberList.splice(i,1); //Remove from list
+                //self.core.trigger('projectListChanged', this.core.UID);
                 return;
             }
         }
@@ -49,7 +60,15 @@ $.Cow.Group.prototype = {
                 return this._getGroups();
                 break;
             case 1:
-                return this._addGroup(groupid);
+                if (!$.isArray(groupid)) {
+                    return this._addGroup(groupid);
+                }
+                else {
+                   $.each(groupid, function(i,d){
+                     self._addGroup(d);
+                   });
+                   return this._getGroups();
+                }
                 break;
             default:
                 throw('wrong argument number');
@@ -67,30 +86,33 @@ $.Cow.Group.prototype = {
             }
         }
         if (!existing){
-            this.groupList.push({id:groupid, status:'active'}); //Adding to the list
+            this.groupList.push(groupid); //Adding to the list
+            //self.core.trigger('projectListChanged', this.core.UID);
         }
         return groupid;
     },
     removeGroup: function(groupid){
         for (var i=0;i<this.groupList.length;i++){
-            if (this.groupList[i].id == groupid) {
-                //this.groupList.splice(i,1); //Remove from list
-                this.groupList[i].status = 'deleted';
+            if (this.groupList[i] == groupid) {
+                this.groupList.splice(i,1); //Remove from list
+                //self.core.trigger('projectListChanged', this.core.UID);
                 return;
             }
         }
     },
     removeAllGroups: function(){
         this.groupList = [];
+        //self.core.trigger('projectListChanged', this.core.UID);
     },
     //Find out if a peer is in a group
     hasMember: function(peerid){
         //See if member is in this group
         var hasmember = false;
         for (var i=0;i<this.memberList.length;i++){
-            if (this.memberList[i].id == peerid && this.memberList[i].status != 'deleted') {
+            //if (this.memberList[i].id == peerid && this.memberList[i].status != 'deleted') {
+            if (this.memberList[i] == peerid)
                 hasmember = true;
-            }
+            
         }
         //See if member is in other group that inherits this group
         var groupsChecked = [this.uid];

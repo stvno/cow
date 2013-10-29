@@ -56,34 +56,47 @@ $.Cow.Project.prototype = {
         return this.groupList;
     },
     _addGroup: function(options){
-        if (!options.uid || !options.name){
+        if (!options._id || !options.name){
             throw('Missing group parameters '+JSON.stringify(options));
         }
         var group,i;
+        var source = options.source;
         var existing = false;
         $.each(this.groupList, function(id, group) {
-                if (options.uid == group.uid) {
+                if (options._id == group._id) {
                     i = id;
                     existing = true;
                 }
         });
-        if (existing){
+        if (existing == true){
             if (options.name){
              this.groupList[i].name = options.name; //Update name of group
              group = this.groupList[i];
             }
         }
-        if (!existing)
+        if (existing == false){
             group = new $.Cow.Group(this, options);
-            if (options.peeruid)
+            if (options.peeruid){
                 group.members(options.peeruid);
+            }
             this.groupList.push(group); //Adding to the list
+        }
+        var toDB = function(){
+            if (this.groupsdb){ 
+                   this.core.groupsdb().bulkLoad_UI(this.project.getGroupsData());//Add public to be sure
+            }
+        }
+        if (source != 'db'){
+            toDB(); //Add to db when incoming data is not from db
+        }
+            
+        
         //TODO: probably need trigger here
         return group;
     },
-    removeGroup: function(uid){
+    removeGroup: function(_id){
         for (var i=0;i<this.groupList.length;i++){
-            if (this.groupList[i].uid == uid) {
+            if (this.groupList[i]._id == _id) {
                 this.groupList.splice(i,1); //Remove from list
                 return;
             }
@@ -92,16 +105,45 @@ $.Cow.Project.prototype = {
     removeAllGroups: function(){
         this.groupList = [];
     },
-    getGroupById: function(uid){
+    myGroups: function(){
+        var mygroups = [];
+        $.each(this.groups(),function(i,d){
+            if (d.hasMember(self.core.UID) == true){
+                mygroups.push(d._id);
+            }
+        });
+        return mygroups;
+    },
+    loadGroupsFromDb: function(d){
+        var self = this;
+        $.each(d.rows, function(i,d){
+            self.groups(d.doc);
+        });
+    },
+    
+    getGroupById: function(_id){
         for (var i=0;i<this.groupList.length;i++){
-            if (this.groupList[i].uid == uid) {
+            if (this.groupList[i]._id == _id) {
                 return this.groupList[i];
             }
         }
         return;
     },
     
-    groupMemberShip: function(peerid){
+    //Get the plain groupsdata without the functions (needed to transfer data)
+    getGroupsData: function(){
+        var groups = [];
+        $.each(this.groupList,function(i,d){
+            
+            var group = {
+                _id: d._id.toString(),
+                name: d.name,
+                members: d.members(),
+                groups: d.groups()
+            };
+            groups.push(group);
+        });
+        return groups;
     },
     bind: function(types, data, fn) {
         var self = this;

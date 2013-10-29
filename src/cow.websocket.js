@@ -14,12 +14,6 @@ $.Cow.Websocket.prototype = {
         var payload = data.payload;    
         var target = data.target;
         switch (action) {
-        /* TEST FOR POUCHDB sync */    
-            case 'pdb':
-                console.log(payload)
-            break;
-            
-            
         //Messages from Server
             //webscocket confirms connection by returning a CID
             case 'connected':
@@ -78,9 +72,9 @@ $.Cow.Websocket.prototype = {
             //a new object was drawn or updated by a peer
             case 'newItem':
                 if(uid != UID) {
-                    var item = JSON.parse(payload).options;
+                    var item = JSON.parse(payload);
                     if (self.core.activeproject() == item.data.properties.store){
-                        core.itemstore().items({data:item, source: 'ws'});
+                        core.itemstore().items('feature',{data:item}, 'ws');
                         //core.featurestore().updateItem(item);
                     }
                 }
@@ -90,18 +84,19 @@ $.Cow.Websocket.prototype = {
                 if(uid != UID) {
                     var item = JSON.parse(payload);
                     if (self.core.activeproject() == item.data.properties.store){
-                        core.itemstore().items({data:item, source: 'ws'});
+                        core.itemstore().items('feature',{data:item},'ws');
                         //core.featurestore().updateItem(item);
                         }
                 }
             break;
-            
+            /*Not in use, maybe later
             //A peer request information about a project
             case 'getProjectInfo':
                 if(uid != UID) {
                     this.obj._onGetProjectInfo(payload);
                 }
             break;
+            */
             //Info about a project comes in...
             case 'projectInfo':
                 if(uid != UID) {
@@ -183,9 +178,9 @@ $.Cow.Websocket.prototype = {
             var items = core.itemstore().items();
             $.each(items, function(i,item){
                 var iditem = {};
-                iditem.key = item.options.key;
-                iditem.updated = item.options.updated;
-                iditem.status = item.options.status;
+                iditem._id = item._id;
+                iditem.timestamp = item.timestamp();
+                iditem.status = item.status();
                 fids.push(iditem);    
             });
             //var store = core.itemstore();
@@ -196,8 +191,8 @@ $.Cow.Websocket.prototype = {
             self.core.websocket().sendData(message, "newPeerFidList");
             
         }
-            //SMO TODO: turn this into a proper callback
-            setTimeout(sendFidList, 2000);
+        //SMO TODO: turn this into a proper callback
+        setTimeout(sendFidList, 2000);
             
         
     },
@@ -217,6 +212,7 @@ $.Cow.Websocket.prototype = {
         }
         else console.log('badpeer '+uid);
     },
+    
     //A new peer has joined, send it your info, compare its items and add it to your
     //peerList
     _onNewPeer: function(payload,uid) {
@@ -282,7 +278,7 @@ $.Cow.Websocket.prototype = {
             //Now add the items that have been sent to the itemstore
             if (pushed_feats.length > 0){
                 $.each(pushed_feats, function(i,feat){
-                        store.items({data: feat, source: 'ws'});
+                        store.items('feature',{data: feat},'ws');
                 });
                 //store.putFeatures(pushed_feats);
             }
@@ -290,12 +286,12 @@ $.Cow.Websocket.prototype = {
     },
     //Peer sends back requested items, now store them
     _onRequestedFeats: function(payload,uid) {
-        var requested_feats = payload;
+        var requested_feats = payload.items;
         if (self.core.activeproject() == payload.storename){
             var store = this.core.itemstore();
             if (requested_feats.length > 0){
                 $.each(requested_feats, function(i,feat){
-                        store.items({data: feat, source: 'ws'});
+                        store.items('feature',{data: feat},'ws');
                 });
                 //store.putFeatures(requested_feats);
             }
@@ -332,6 +328,7 @@ $.Cow.Websocket.prototype = {
         }
         else console.warn('badpeer '+uid);
     },
+    /*Not in use. Maybe in future
     //A peer wants to have more info about a project. send it
     _onGetProjectInfo: function(payload){
         //Everybody sends data back, if available
@@ -348,12 +345,22 @@ $.Cow.Websocket.prototype = {
              }
         })
     },
+    */
     _onProjectInfo: function(payload,uid){
         var options = {};
-        options.uid = payload.uid;
+        if (payload.uid) options._id = payload.uid //COUCHDB temporary solution
+        else options._id = payload._id;
         options.name = payload.name;
-        options.peeruid = uid;
-        this.core.projects(options);
+        options.peeruid = uid; //Add this peer to the project members
+        var project = this.core.projects(options);
+        if (payload.groups){//Add group info to project
+            $.each(payload.groups, function(i,d){
+                    var group = project.groups({_id:d._id, name: d.name});
+                    group.members(d.members);
+                    group.groups(d.groups);
+            });
+        }
+        this.core.trigger('projectListChanged');
     },
     //My stuff has changed, send over the changed data to the other peers
     _onMeChanged: function(evt, payload) {

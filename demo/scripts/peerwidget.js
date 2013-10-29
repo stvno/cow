@@ -140,7 +140,7 @@ $.widget("cow.PeersWidget", {
         element.delegate('.addProject','click', function(){
             var time = new Date().getTime();
             var name = $('#newProject').val();
-            self.core.projects({uid: time,name:name, peeruid: self.core.UID});
+            self.core.projects({_id: time,name:name, peeruid: self.core.UID});
             $('#newProject').val('Add a new project');
             //$(this).parent().addClass('verborgen');
         });
@@ -152,6 +152,17 @@ $.widget("cow.PeersWidget", {
         element.delegate('.project','click', function(){
             var projectuid = $(this).attr('project');
             self.core.activeproject({activeProjectId:projectuid});
+        });
+        
+        element.delegate('.group','click', function(){
+            var group_id = $(this).attr('group');
+            var group = self.core.project.getGroupById(group_id);
+            if ($(this).hasClass('me')){
+                group.removeMember(self.core.UID);
+            }
+            else{
+                group.members(self.core.UID);
+            }
         });
         
         this.peerjsdiv.delegate("#cameraOnOff",'click',function(){
@@ -342,10 +353,11 @@ $.widget("cow.PeersWidget", {
         var projects = [];
         $.each(self.core.projects(),function(i) {
             projects[i] = {};
-            projects[i].uid = this.uid;
+            projects[i]._id = this._id;
             projects[i].name = this.options.name;
             projects[i].active = this.options.active;
             projects[i].peers = this.members();
+            projects[i].groups = this.groups();
         });
 
         var element = self.element;
@@ -355,15 +367,24 @@ $.widget("cow.PeersWidget", {
         $.each(projects,function() {
             var project = this;
             if (project.active){
+                var groups = "" ;
+                $.each(project.groups, function(i,d){
+                    if (d.hasMember(self.core.UID))
+                        groups = groups + "<span class='group me' group="+d._id+">"+d.name+ "</span>, ";
+                    else
+                        groups = groups + "<span class = 'group' group="+d._id+">" + d.name+ "</span>, ";
+                })
+                
                 var remove = '';
-                if(this.uid != 0) {
+                if(this._id != 0) {
                     remove = ' <span class="removeproject" title="' + translator.translate('txt_projectwillberemoved') + '">' + translator.translate('txt_remove') + '</span><div class="removeprojectconfirm verborgen">' + translator.translate('txt_yousure') + '<span class="yesremove" title"' + translator.translate('txt_projectwillberemoved') + '">"' + translator.translate('txt_yes')+'</span><span class="notremove" title="alrighty">"' + translator.translate('txt_no') + '</span></div>';
                 }
-                if(this.uid==self.core.activeproject()) {
-                    names = names + '<div><span class="peerlist project me" title="' + translator.translate('txt_yourproject') + '" project="'+this.uid+'">'+this.name+'</span></div>';
+                if(this._id==self.core.activeproject()) {
+                    names = names + '<div><span class="peerlist project me" title="' + translator.translate('txt_yourproject') + '" project="'+this._id+'">'+this.name+'</span></div>';
+                    names = names + '<div><small>'+groups+'</small></div>';
                 }
                 else {
-                    names = names + '<div><span class="peerlist project" title="' + translator.translate('txt_activateproject') + '" project="'+this.uid+'">'+this.name+'</span>'+remove+'</div>';
+                    names = names + '<div><span class="peerlist project" title="' + translator.translate('txt_activateproject') + '" project="'+this._id+'">'+this.name+'</span>'+remove+'</div>';
                 }
                 $.each(this.peers, function(i){
                     var peer = self.core.getPeerByUid(project.peers[i]);
