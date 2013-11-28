@@ -36,6 +36,9 @@ $.Cow.Websocket.prototype = {
                     this.obj._onSyncPeer(payload,uid);
                 }
             break;
+          
+                
+        //Messages from Peers: broadcasted messages
             //requested feats are returning from peer
             case 'requestedFeats':
                 if(uid != UID) {
@@ -43,8 +46,6 @@ $.Cow.Websocket.prototype = {
                 }
             break;
             
-                
-        //Messages from Peers: broadcasted messages
             //a peer is gone and everybody has a new connection-id, recieve a connectionID with UID
             case 'updatePeers':
                 if(uid != UID) {            

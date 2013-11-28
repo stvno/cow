@@ -1,5 +1,25 @@
-####Messaging
+####Messaging Protocol
 
-### Use cases
+**websocket**
+
+*connected*
+
+
+
+''''
+{
+    "action" : "connected",
+    "payload" : {
+        "cid" : connectionid
+    }
+}
+''''
+
+*peerGone*
+
+*updatePeers*
+
+
+
 
 
