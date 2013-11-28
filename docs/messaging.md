@@ -6,14 +6,14 @@
 
 
 
-''''
+```
 {
     "action" : "connected",
     "payload" : {
         "cid" : connectionid
     }
 }
-''''
+```
 
 *peerGone*
 
