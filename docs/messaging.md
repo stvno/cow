@@ -19,20 +19,6 @@ This message is send by the websocket server to the peer once a connection has b
 }
 ```
 
-*newPeer* **TODO: rewrite to spec**
-
-This message is send by the peer once the connection to the server is established to tell the other peers (and the server) what its unique PEERID is. This way other peers will be able to find him once the network topology changes. 
-
-```
-{
-    "action" : "newPeer",
-    "payload" : {
-        "peerID" : PEERID
-    }
-}
-```
-
-
 *peerGone* (targeted)
 
 This message is send by the websocket server to peers once a connection is lost between another peer and the server. It contains the LOSTPEERID; the PEERID of peer that has left. This is a read only message sent by the server and never by a client.
@@ -45,4 +31,6 @@ This message is send by the websocket server to peers once a connection is lost 
     }
 }
 ```
+
+**syncing**
 

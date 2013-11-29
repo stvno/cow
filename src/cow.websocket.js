@@ -15,14 +15,11 @@ $.Cow.Websocket.prototype = {
         var target = data.target;
         switch (action) {
         //Messages from Server
-            //webscocket confirms connection by returning a CID
+            //webscocket confirms connection by returning the unique peerID
             case 'connected':
                 this.obj._onConnect(payload)
             break;
-            //the server noticed a peer disconnecting and send its connection-id to the pool
-            case 'peerGone':
-                this.obj._onPeerGone(payload);
-            break;            
+                
         //Messages from Peers: targeted messages
             //the client has joined and receives the status from peers: connection-id, uid, extent
             case 'informPeer':
@@ -39,6 +36,11 @@ $.Cow.Websocket.prototype = {
           
                 
         //Messages from Peers: broadcasted messages
+            //the server noticed a peer disconnecting and send its connection-id to the pool
+            case 'peerGone':
+                this.obj._onPeerGone(payload);
+            break;      
+        
             //requested feats are returning from peer
             case 'requestedFeats':
                 if(uid != UID) {
