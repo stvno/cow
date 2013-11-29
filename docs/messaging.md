@@ -34,3 +34,56 @@ This message is send by the websocket server to peers once a connection is lost 
 
 **syncing**
 
+*newList*
+
+```
+{
+    "action" : "newList",
+    "sender" : PEERID,
+    "payload" : {
+        "syncType" : ITEMTYPE,
+        "list" : MYLIST
+    }
+}
+```
+
+*wantedList*
+
+```
+{
+    "action" : "wantedList",
+    "sender" : PEERID,
+    "target" : TARGETPEERID,
+    "payload" : {
+        "syncType" : ITEMTYPE,
+        "list" : YOURLIST
+    }
+}
+```
+
+*missingItems*
+
+```
+{
+    "action" : "missingItems",
+    "sender" : PEERID,
+    "target" : TARGETPEERID,
+    "payload" : {
+        "syncType" : ITEMTYPE,
+        "items" : {}
+    }
+}
+```
+
+*requestedItems*
+
+```
+{
+    "action" : "missingItems",
+    "sender" : PEERID,
+    "payload" : {
+        "syncType" : ITEMTYPE,
+        "items" : {}
+    }
+}
+```
