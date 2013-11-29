@@ -70,7 +70,7 @@ This message is send by the websocket server to peers once a connection is lost 
     "target" : TARGETPEERID,
     "payload" : {
         "syncType" : ITEMTYPE,
-        "items" : {}
+        "items" : [{}]
     }
 }
 ```
@@ -83,7 +83,7 @@ This message is send by the websocket server to peers once a connection is lost 
     "sender" : PEERID,
     "payload" : {
         "syncType" : ITEMTYPE,
-        "items" : {}
+        "items" : [{}]
     }
 }
 ```
