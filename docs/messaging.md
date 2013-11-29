@@ -41,7 +41,7 @@ This message is send by the websocket server to peers once a connection is lost 
 {
     "action" : "peerGone",
     "payload": { 
-        "gonePeer" : LOSTPEERID
+        "gonePeerID" : LOSTPEERID
     }
 }
 ```

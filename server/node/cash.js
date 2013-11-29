@@ -28,8 +28,8 @@ var server = http.createServer(function(request, response) {
    console.log(e.stack);
   }
 });
-server.listen(8081, function() {
-    console.log((new Date()) + ' Server is listening on port 8081');
+server.listen(9001, function() {
+    console.log((new Date()) + ' Server is listening on port 9001');
 });
 
 wsServer = new WebSocketServer({
@@ -66,7 +66,8 @@ wsServer.on('request', function(request) {
   var connection = request.accept('connect', request.origin);
   connections.push(connection);
   var ci = connections.indexOf(connection);
-  connection.sendUTF('{"action":"connected","payload":{"cid":'+ci+'}}');
+  peers[ci] = new Date().getTime();
+  connection.sendUTF('{"action":"connected","payload":{"peerID":'+peers[ci]+'}}');
   
   /*
    Once a connection is established messages can be received, these
@@ -75,7 +76,7 @@ wsServer.on('request', function(request) {
    for project-members and cash should make sure that it knows which
    cow is in which project and pass the messages on to the correct members.
   */
-  connection.on('message', function(message) {
+  connection.on('message', function(message) {    
     if (message.type === 'utf8'&& message.utf8Data !==undefined) {
       var data = JSON.parse(message.utf8Data);
      
@@ -84,34 +85,13 @@ wsServer.on('request', function(request) {
         var index = peers.indexOf(data.target);
         if (index !== -1) {
             connections[index].sendUTF(message.utf8Data);
-            console.log('tarrget ' + data.target);
-        }
-    
+            console.log('target ' + data.target);
+        }    
       }
       else {
         connections.forEach(function(destination) {
           destination.sendUTF(message.utf8Data);
-        });
-        var action = data.action;
-        switch (action) {
-            /*These are the actions needed to make sure that the cid and uid are correct*/
-            //a peer is gone and everybody has a new connection-id, recieve a connectionID with UID
-           /* case 'updatePeers':
-                
-                var uid = data.payload.uid;
-                var cid = data.payload.connectionID;
-                peers[cid] = uid;
-                console.log('newpeers: ' + peers);
-            break;*/
-            //a new peer just joined, recieve its status: connection-id, uid, extent
-            // TODO: hoeft niet per se zo te zien, de cid/uid wordt ook al bijgehouden door de conenction.close
-            case 'newPeer':
-                var uid = data.payload.uid;
-                var cid = data.payload.cid;
-                peers[cid] = uid;
-                console.log(peers);
-            break;
-        }
+        });       
       }
     }
   });
@@ -119,15 +99,12 @@ wsServer.on('request', function(request) {
   connection.on('close', function() {
     var index = connections.indexOf(connection);
     if (index !== -1) {
+      connections.forEach(function(destination) {
+        destination.sendUTF('{"action":"peerGone","payload":{"gonePeerID":'+peers[index]+'}}');
+      });
       // remove the connection from the pool
       connections.splice(index, 1);
       peers.splice(index, 1);
-      console.log('removed: '+peers);
-      connections.forEach(function(destination) {
-        //alert the other peers
-        var ci = connections.indexOf(destination);
-        destination.sendUTF('{"action":"peerGone","payload":{"peerCid":'+index+',"newCid":'+ci+'}}');
-      });
     }
   });
 });
