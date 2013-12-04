@@ -75,15 +75,15 @@ This message is send by the websocket server to peers once a connection is lost 
 }
 ```
 
-*requestedItems*
+*updatedRecord*
 
 ```
 {
-    "action" : "requestedItems",
+    "action" : "updatedRecord",
     "sender" : PEERID,
     "payload" : {
         "syncType" : ITEMTYPE,
-        "items" : [{}]
+        "record : {}
     }
 }
 ```
