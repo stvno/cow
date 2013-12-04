@@ -42,7 +42,8 @@ This message is send by the websocket server to peers once a connection is lost 
     "sender" : PEERID,
     "payload" : {
         "syncType" : ITEMTYPE,
-        "list" : MYLIST
+        "list" : MYLIST,
+        "project": PROJECTID //optional
     }
 }
 ```
@@ -56,7 +57,8 @@ This message is send by the websocket server to peers once a connection is lost 
     "target" : TARGETPEERID,
     "payload" : {
         "syncType" : ITEMTYPE,
-        "list" : YOURLIST
+        "list" : YOURLIST,
+        "project": PROJECTID //optional
     }
 }
 ```
@@ -70,7 +72,8 @@ This message is send by the websocket server to peers once a connection is lost 
     "target" : TARGETPEERID,
     "payload" : {
         "syncType" : ITEMTYPE,
-        "items" : [{}]
+        "items" : [{}],
+        "project": PROJECTID //optional
     }
 }
 ```
@@ -83,7 +86,8 @@ This message is send by the websocket server to peers once a connection is lost 
     "sender" : PEERID,
     "payload" : {
         "syncType" : ITEMTYPE,
-        "record : {}
+        "record : {},
+        "project": PROJECTID //optional
     }
 }
 ```
